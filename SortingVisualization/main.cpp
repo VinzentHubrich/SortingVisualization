@@ -23,7 +23,7 @@ unsigned int arrayReads;
 
 std::list<unsigned int> activeValues = {};
 
-enum Algorithm
+enum class Algorithm
 {
     None,
     Confirm,
@@ -47,19 +47,19 @@ void startAlgorithm(Algorithm alg = Algorithm::None) {
     
     switch (alg)
     {
-    case None:
+    case Algorithm::None:
         algorithm = Algorithm::None;
         activeValues.clear();
         break;
-    case Confirm:
+    case Algorithm::Confirm:
         algorithm = Algorithm::Confirm;
         sortingIterationsLeft = count - 1;
         break;
-    case FisherYatesShuffle:
+    case Algorithm::FisherYatesShuffle:
         algorithm = Algorithm::FisherYatesShuffle;
         sortingIterationsLeft = count - 1;
         break;
-    case BubbleSort:
+    case Algorithm::BubbleSort:
         algorithm = Algorithm::BubbleSort;
         sortingIterationsLeft = count;
         currentSortingStep = 0;
@@ -189,15 +189,15 @@ int main()
 
         switch (algorithm)
         {
-        case None:
+        case Algorithm::None:
             break;
-        case Confirm:
+        case Algorithm::Confirm:
             if (confirm()) startAlgorithm();
             break;
-        case FisherYatesShuffle:
+        case Algorithm::FisherYatesShuffle:
             if (randomize()) startAlgorithm();
             break;
-        case BubbleSort:
+        case Algorithm::BubbleSort:
             if (bubbleSort()) startAlgorithm(Algorithm::Confirm);
             break;
         default:
