@@ -28,17 +28,23 @@ enum class Algorithm
     None,
     Confirm,
     FisherYatesShuffle,
-    BubbleSort
+    BubbleSort,
+    SelectionSort
 };
 
 Algorithm algorithm = Algorithm::None;
 
 void swap(float* a, float* b);
 
+int minIndex(int i, int j);
+
 bool checkIterationDelay(unsigned int delayInMilliseconds);
 
 void startAlgorithm(Algorithm alg = Algorithm::None) {
     if (algorithm == alg) return;
+
+    algorithm = alg;
+    activeValues.clear();
 
     if (alg != Algorithm::Confirm) {
         comparisons = 0;
@@ -49,23 +55,22 @@ void startAlgorithm(Algorithm alg = Algorithm::None) {
     switch (alg)
     {
     case Algorithm::None:
-        algorithm = Algorithm::None;
-        activeValues.clear();
         break;
     case Algorithm::Confirm:
-        algorithm = Algorithm::Confirm;
         sortingIterationsLeft = count - 1;
         break;
     case Algorithm::FisherYatesShuffle:
-        algorithm = Algorithm::FisherYatesShuffle;
         sortingIterationsLeft = count - 1;
         algName = "Fisher-Yates Shuffle";
         break;
     case Algorithm::BubbleSort:
-        algorithm = Algorithm::BubbleSort;
         sortingIterationsLeft = count;
         currentSortingStep = 0;
         algName = "Bubble Sort";
+        break;
+    case Algorithm::SelectionSort:
+        currentSortingStep = 0;
+        algName = "Selection Sort";
         break;
     default:
         break;
@@ -77,7 +82,6 @@ void startAlgorithm(Algorithm alg = Algorithm::None) {
 bool confirm() {
     if (sortingIterationsLeft < 1) {
         if (!checkIterationDelay(3000)) return false;
-        activeValues.clear();
         return true;
     }
 
@@ -98,10 +102,7 @@ bool randomize()
 {
     if (!checkIterationDelay(10)) return false;
 
-    if (sortingIterationsLeft < 1) {
-        activeValues.clear();
-        return true;
-    }
+    if (sortingIterationsLeft == 0) return true;
 
     algorithm = Algorithm::FisherYatesShuffle;
 
@@ -121,10 +122,7 @@ bool randomize()
 bool bubbleSort() {
     if (!checkIterationDelay(1)) return false;
     
-    if (sortingIterationsLeft == 1 ) {
-        activeValues.clear();
-        return true;
-    }
+    if (sortingIterationsLeft == 1 ) return true;
 
     if (currentSortingStep >= sortingIterationsLeft - 1) {
         (sortingIterationsLeft)--;
@@ -135,11 +133,27 @@ bool bubbleSort() {
     activeValues = { currentSortingStep, currentSortingStep + 1 };
 
     arrayReads += 2;
-    if (values[currentSortingStep] > values[currentSortingStep + 1]) {
+    if (values[currentSortingStep] > values[currentSortingStep + 1])
         swap(&values[currentSortingStep], &values[currentSortingStep + 1]);
-    }
 
     comparisons++;
+    currentSortingStep++;
+    return false;
+}
+
+bool selectionSort() {
+    if (!checkIterationDelay(50)) return false;
+
+    if (currentSortingStep == count) return true;
+
+    // calling minimum index function for minimum index
+    unsigned int k = minIndex(currentSortingStep, count - 1);
+
+    activeValues = { k, currentSortingStep };
+    // Swapping when index and minimum index are not same
+    if (k != currentSortingStep)
+        swap(&values[k], &values[currentSortingStep]);
+
     currentSortingStep++;
     return false;
 }
@@ -151,7 +165,7 @@ int main()
 
     if (SCREENWIDTH % barWidth != 0) std::cout << "WARNING: Width of window not divisible by width of bars (" + std::to_string(SCREENWIDTH% barWidth) + "px unused)" << std::endl;
 
-    std::cout << "Controls\n\n'C' - Cancel current algorithm\n'R' - Fisher-Yates Shuffle\n'B' - Bubble Sort\n\n" << std::endl;
+    std::cout << "Controls\n\n'C' - Cancel current algorithm\n'R' - Fisher-Yates Shuffle\n'B' - Bubble Sort\n'S' - Selection Sort\n\n" << std::endl;
 
     sf::Font font;
     font.loadFromFile("arial.ttf");
@@ -182,13 +196,17 @@ int main()
         {
             startAlgorithm(Algorithm::None);
         }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::R))
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::R))
         {
             startAlgorithm(Algorithm::FisherYatesShuffle);
         }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::B))
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::B))
         {
             startAlgorithm(Algorithm::BubbleSort);
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
+        {
+            startAlgorithm(Algorithm::SelectionSort);
         }
 
         // TODO: Change time scale
@@ -205,6 +223,9 @@ int main()
             break;
         case Algorithm::BubbleSort:
             if (bubbleSort()) startAlgorithm(Algorithm::Confirm);
+            break;
+        case Algorithm::SelectionSort:
+            if (selectionSort()) startAlgorithm(Algorithm::Confirm);
             break;
         default:
             break;
@@ -227,8 +248,6 @@ int main()
             value.setOutlineThickness(1.0f);
             value.setOutlineColor(sf::Color::Black);
             window.draw(value);
-
-            
         }
 
         std::string details = std::to_string(comparisons) + " comparisons, " + std::to_string(arrayReads)+ " array reads";
@@ -248,6 +267,20 @@ void swap(float* a, float* b)
     float temp = *a;
     *a = *b;
     *b = temp;
+}
+
+int minIndex(int i, int j)
+{
+    if (i == j)
+        return i;
+
+    // Find minimum of remaining elements
+    int k = minIndex(i + 1, j);
+
+    arrayReads += 2;
+    comparisons++;
+    // Return minimum of current and remaining.
+    return (values[i] < values[k]) ? i : k;
 }
 
 bool checkIterationDelay(unsigned int delayInMilliseconds)
