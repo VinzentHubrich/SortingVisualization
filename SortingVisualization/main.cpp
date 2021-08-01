@@ -3,11 +3,11 @@
 #include <iostream>
 #include <list>
 
-const unsigned int SCREENWIDTH = 1000;
-const unsigned int SCREENHEIGHT = 600;
+const unsigned int SCREENWIDTH = 1200;
+const unsigned int SCREENHEIGHT = 700;
 
 const float barHeightScale = 0.95f;
-const unsigned int barWidth = 10;
+const unsigned int barWidth = 12;
 const unsigned int count = SCREENWIDTH / barWidth;
 
 float values[count] = {};
@@ -44,6 +44,7 @@ void startAlgorithm(Algorithm alg = Algorithm::None) {
         comparisons = 0;
         arrayReads = 0;
     }
+    std::string algName;
     
     switch (alg)
     {
@@ -58,15 +59,19 @@ void startAlgorithm(Algorithm alg = Algorithm::None) {
     case Algorithm::FisherYatesShuffle:
         algorithm = Algorithm::FisherYatesShuffle;
         sortingIterationsLeft = count - 1;
+        algName = "Fisher-Yates Shuffle";
         break;
     case Algorithm::BubbleSort:
         algorithm = Algorithm::BubbleSort;
         sortingIterationsLeft = count;
         currentSortingStep = 0;
+        algName = "Bubble Sort";
         break;
     default:
         break;
     }
+    
+    if (!algName.empty()) std::cout << "INFO: Starting " + algName << std::endl;
 }
 
 bool confirm() {
@@ -144,11 +149,12 @@ int main()
     // Window setup
     sf::RenderWindow window(sf::VideoMode(SCREENWIDTH, SCREENHEIGHT), "Sorting Visualization");
 
+    if (SCREENWIDTH % barWidth != 0) std::cout << "WARNING: Width of window not divisible by width of bars (" + std::to_string(SCREENWIDTH% barWidth) + "px unused)" << std::endl;
+
+    std::cout << "Controls\n\n'C' - Cancel current algorithm\n'R' - Fisher-Yates Shuffle\n'B' - Bubble Sort\n\n" << std::endl;
+
     sf::Font font;
-    if (!font.loadFromFile("arial.ttf"))
-    {
-        std::cout << "Couldn't load font" << std::endl;
-    }
+    font.loadFromFile("arial.ttf");
 
     // Equally distribute values along screen width
     for (int i = 0; i < count; i++)
