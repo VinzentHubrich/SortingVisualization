@@ -34,6 +34,7 @@ enum class Algorithm
 };
 
 Algorithm algorithm = Algorithm::None;
+std::string algName = "";
 
 void swap(float* a, float* b);
 
@@ -51,15 +52,15 @@ void startAlgorithm(Algorithm alg = Algorithm::None) {
         comparisons = 0;
         arrayReads = 0;
     }
-    std::string algName;
     
     switch (alg)
     {
     case Algorithm::None:
+        algName = "";
         break;
     case Algorithm::Confirm:
         sortingIterationsLeft = count - 1;
-        break;
+        return;
     case Algorithm::FisherYatesShuffle:
         sortingIterationsLeft = count - 1;
         algName = "Fisher-Yates Shuffle";
@@ -81,12 +82,13 @@ void startAlgorithm(Algorithm alg = Algorithm::None) {
         break;
     }
     
-    if (!algName.empty()) std::cout << "INFO: Starting " + algName << std::endl;
+    if (!algName.empty()) std::cout << "[Starting] " + algName << std::endl;
 }
 
 bool confirm() {
     if (sortingIterationsLeft < 1) {
         if (!checkIterationDelay(3000)) return false;
+        std::cout << "\t[Result] " + std::to_string(comparisons) + " comparisons and " + std::to_string(arrayReads) + " array reads were made\n" << std::endl;
         return true;
     }
 
@@ -250,7 +252,7 @@ int main()
         case Algorithm::None:
             break;
         case Algorithm::Confirm:
-            if (confirm()) startAlgorithm();
+            if (confirm()) startAlgorithm(Algorithm::FisherYatesShuffle);
             break;
         case Algorithm::FisherYatesShuffle:
             if (randomize()) startAlgorithm();
@@ -287,9 +289,11 @@ int main()
             window.draw(value);
         }
 
-        std::string details = std::to_string(comparisons) + " comparisons, " + std::to_string(arrayReads)+ " array reads";
-        sf::Text info = sf::Text(details, font);
-        window.draw(info);
+        if (!algName.empty()) {
+            std::string details = algName + " - " + std::to_string(comparisons) + " comparisons, " + std::to_string(arrayReads) + " array reads";
+            sf::Text info = sf::Text(details, font);
+            window.draw(info);
+        }
 
         // Update the window
         window.display();
