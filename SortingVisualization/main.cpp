@@ -29,7 +29,8 @@ enum class Algorithm
     Confirm,
     FisherYatesShuffle,
     BubbleSort,
-    SelectionSort
+    SelectionSort,
+    InsertionSort
 };
 
 Algorithm algorithm = Algorithm::None;
@@ -71,6 +72,10 @@ void startAlgorithm(Algorithm alg = Algorithm::None) {
     case Algorithm::SelectionSort:
         currentSortingStep = 0;
         algName = "Selection Sort";
+        break;
+    case Algorithm::InsertionSort:
+        currentSortingStep = 1;
+        algName = "Insertion Sort";
         break;
     default:
         break;
@@ -158,6 +163,31 @@ bool selectionSort() {
     return false;
 }
 
+bool insertionSort() {
+    if (!checkIterationDelay(35)) return false;
+
+    if (currentSortingStep == count) return true;
+
+    comparisons += 2;
+    float key = values[currentSortingStep];
+    unsigned int j = currentSortingStep - 1;
+
+    while (j >= 0 && values[j] > key)
+    {
+        comparisons += 2;
+        arrayReads += 3;
+        values[j + 1] = values[j];
+        j = j - 1;
+    }
+    values[j + 1] = key;
+
+    arrayReads += 3;
+    activeValues = { j + 1, currentSortingStep };
+
+    currentSortingStep++;
+    return false;
+}
+
 int main()
 {
     // Window setup
@@ -165,7 +195,7 @@ int main()
 
     if (SCREENWIDTH % barWidth != 0) std::cout << "WARNING: Width of window not divisible by width of bars (" + std::to_string(SCREENWIDTH% barWidth) + "px unused)" << std::endl;
 
-    std::cout << "Controls\n\n'C' - Cancel current algorithm\n'R' - Fisher-Yates Shuffle\n'B' - Bubble Sort\n'S' - Selection Sort\n\n" << std::endl;
+    std::cout << "Controls\n\n'C' - Cancel current algorithm\n'R' - Fisher-Yates Shuffle\n'B' - Bubble Sort\n'S' - Selection Sort\n'I' - Insertion Sort\n\n" << std::endl;
 
     sf::Font font;
     font.loadFromFile("arial.ttf");
@@ -208,6 +238,10 @@ int main()
         {
             startAlgorithm(Algorithm::SelectionSort);
         }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::I))
+        {
+            startAlgorithm(Algorithm::InsertionSort);
+        }
 
         // TODO: Change time scale
 
@@ -226,6 +260,9 @@ int main()
             break;
         case Algorithm::SelectionSort:
             if (selectionSort()) startAlgorithm(Algorithm::Confirm);
+            break;
+        case Algorithm::InsertionSort:
+            if (insertionSort()) startAlgorithm(Algorithm::Confirm);
             break;
         default:
             break;
