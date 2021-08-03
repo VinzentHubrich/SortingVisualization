@@ -87,7 +87,7 @@ void startAlgorithm(Algorithm alg = Algorithm::None) {
 
 bool confirm() {
     if (sortingIterationsLeft < 1) {
-        if (!checkIterationDelay(3000)) return false;
+        if (!checkIterationDelay(1000)) return false;
         std::cout << "\t[Result] " + std::to_string(comparisons) + " comparisons and " + std::to_string(arrayReads) + " array reads were made\n" << std::endl;
         return true;
     }
